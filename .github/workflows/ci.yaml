@@ -11,6 +11,22 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:12
+        env:
+          POSTGRES_USER: root
+          POSTGRES_DB: simple_bank
+          POSTGRES_PASSWORD: secret
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+
     steps:
       - uses: actions/checkout@v2
 
@@ -19,6 +35,7 @@ jobs:
         with:
           go-version: 1.15
 
-
+      - name: run db migrations
+        run: make migrateup
       - name: Test
         run: make test
